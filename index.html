@@ -13,15 +13,26 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col selection:bg-cyan-500 selection:text-slate-950">
 
-    <!-- PANTALLA DE MANTENIMIENTO (SI EL ADMIN APAGA LA WEB) -->
+    <!-- PANTALLA DE MANTENIMIENTO CON ACCESO SECRETO DE ADMIN -->
     <div id="pantalla-mantenimiento" class="hidden fixed inset-0 bg-slate-950 z-[100] flex flex-col items-center justify-center p-4 text-center">
         <div class="w-20 h-20 bg-rose-500/10 border-2 border-rose-500/40 rounded-3xl flex items-center justify-center mb-6 shadow-2xl animate-pulse">
             <i class="fa-solid fa-triangle-exclamation text-rose-500 text-3xl"></i>
         </div>
         <h1 class="text-3xl font-black text-white mb-2">Portal en Mantenimiento / Cerrado</h1>
-        <p class="text-slate-400 text-sm max-w-md mx-auto">Los administradores han cerrado temporalmente el portal. Por favor, espera a que vuelva a abrirse.</p>
-        <div id="admin-aviso-desbloqueo" class="mt-6 hidden">
-            <p class="text-xs text-emerald-400 font-bold"><i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Detectando apertura automática...</p>
+        <p class="text-slate-400 text-sm max-w-md mx-auto mb-6">Los administradores han cerrado temporalmente el portal.</p>
+        
+        <!-- Acceso de emergencia para administradores si la web está cerrada -->
+        <div class="border-t border-slate-900 pt-6 w-full max-w-xs">
+            <button onclick="toggleAdminEmergencia()" class="text-xs text-slate-500 hover:text-cyan-400 transition-colors font-medium">
+                <i class="fa-solid fa-key mr-1"></i> ¿Eres Admin? Acceso de Emergencia
+            </button>
+            <div id="form-admin-emergencia" class="hidden mt-4 space-y-3">
+                <input type="password" id="password-admin-emergencia" placeholder="Contraseña de Administrador" 
+                    class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white text-center focus:outline-none focus:border-rose-500">
+                <button onclick="loginAdminEmergencia()" class="w-full bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold py-2 rounded-xl text-xs shadow">
+                    Entrar y Abrir Portal
+                </button>
+            </div>
         </div>
     </div>
 
@@ -129,19 +140,6 @@
                     <button onclick="enviarAvisoGlobal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow">Enviar Alerta</button>
                 </div>
             </div>
-
-            <!-- CRONÓMETRO GLOBAL -->
-            <div class="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2"><i class="fa-solid fa-stopwatch mr-1.5"></i> Control de Cuenta Atrás</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-                    <input type="text" id="admin-cronometro-titulo" placeholder="Título (ej: Entrega en:)" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
-                    <input type="number" id="admin-cronometro-minutos" placeholder="Minutos restantes" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
-                </div>
-                <div class="flex space-x-2">
-                    <button onclick="activarCronometroGlobal()" class="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs shadow">Activar Cronómetro</button>
-                    <button onclick="desactivarCronometroGlobal()" class="flex-1 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 font-bold py-2.5 rounded-xl text-xs shadow">Desactivar Cronómetro</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -150,13 +148,6 @@
         <i class="fa-solid fa-triangle-exclamation text-base"></i>
         <span id="texto-alerta-global">Aviso del Administrador</span>
         <button onclick="cerrarAlertaGlobal()" class="text-amber-400 hover:text-white ml-4"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-
-    <!-- BANNER DE CRONÓMETRO GLOBAL -->
-    <div id="banner-cronometro" class="hidden bg-cyan-500/10 border-b border-cyan-500/30 text-cyan-300 px-6 py-2.5 text-center text-xs font-semibold flex items-center justify-center space-x-3">
-        <i class="fa-solid fa-stopwatch text-base animate-spin"></i>
-        <span id="texto-cronometro-titulo">Evento próximo:</span>
-        <span id="reloj-cuenta-atras" class="font-mono bg-cyan-950 border border-cyan-500/40 px-2.5 py-0.5 rounded text-white font-bold">00:00</span>
     </div>
 
     <!-- CONTENIDO PRINCIPAL -->
@@ -324,6 +315,7 @@
             document.getElementById('login-modal').classList.add('hidden');
             document.getElementById('admin-status-bar').classList.remove('hidden');
             document.getElementById('admin-badge-name').innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i> ADMIN (${nombreAdmin})`;
+            document.getElementById('pantalla-mantenimiento').classList.add('hidden');
             conectarCanalTiempoReal();
         }
 
@@ -342,6 +334,30 @@
             }
             sessionStorage.clear();
             location.reload();
+        }
+
+        // ACCESO DE EMERGENCIA DESDE LA PANTALLA DE MANTENIMIENTO
+        function toggleAdminEmergencia() {
+            let form = document.getElementById('form-admin-emergencia');
+            form.classList.toggle('hidden');
+        }
+
+        async function loginAdminEmergencia() {
+            let pass = document.getElementById('password-admin-emergencia').value.trim();
+            if(pass === ADMIN_JAVI) {
+                sessionStorage.setItem('smr_is_admin', 'true');
+                sessionStorage.setItem('smr_admin_name', 'Javi');
+                // Abrir portal automáticamente al entrar como admin
+                await cambiarEstadoPortal(true);
+                abrirInterfazAdmin('Javi');
+            } else if(pass === ADMIN_CHRISTIAN) {
+                sessionStorage.setItem('smr_is_admin', 'true');
+                sessionStorage.setItem('smr_admin_name', 'Christian');
+                await cambiarEstadoPortal(true);
+                abrirInterfazAdmin('Christian');
+            } else {
+                alert('Contraseña de administrador incorrecta.');
+            }
         }
 
         // MOTOR EN TIEMPO REAL
@@ -413,18 +429,16 @@
         // EXPULSIÓN Y BANEO INSTANTÁNEO
         async function comprobarExpulsionBaneo(payload) {
             const isAdmin = sessionStorage.getItem('smr_is_admin') === 'true';
-            if(isAdmin) return; // Los admins no son expulsados
+            if(isAdmin) return; 
 
             let nombreUsuario = sessionStorage.getItem('smr_current_user');
             
-            // Si lo borran de usuarios_online (desconectar)
             if(payload.table === 'usuarios_online' && payload.eventType === 'DELETE' && payload.old.id === usuarioActualId) {
                 alert('Has sido desconectado por el administrador.');
                 sessionStorage.clear();
                 location.reload();
             }
 
-            // Si lo meten en baneados
             if(payload.table === 'baneados' && payload.eventType === 'INSERT' && nombreUsuario) {
                 if(payload.new.nombre.toLowerCase() === nombreUsuario.toLowerCase()) {
                     alert('Has sido baneado del portal.');
@@ -457,10 +471,9 @@
         // CONTROL DE ESTADO DEL PORTAL (ABIERTO / CERRADO)
         async function cambiarEstadoPortal(abierto) {
             await _supabase.from('configuracion').upsert({ id: 'estado_portal', activo: abierto });
-            alert(abierto ? '¡Portal abierto para todos!' : '¡Portal cerrado en mantenimiento!');
         }
 
-        // ALERTAS Y CRONÓMETROS EN TIEMPO REAL
+        // ALERTAS GLOBALES
         async function enviarAvisoGlobal() {
             let texto = document.getElementById('admin-aviso-input').value.trim();
             if(!texto) return;
@@ -476,25 +489,6 @@
             await _supabase.from('configuracion').upsert({ id: 'alerta', activo: false });
         }
 
-        async function activarCronometroGlobal() {
-            let titulo = document.getElementById('admin-cronometro-titulo').value.trim() || 'Evento próximo:';
-            let minutos = parseInt(document.getElementById('admin-cronometro-minutos').value) || 5;
-            let tiempoFin = new Date().getTime() + (minutos * 60 * 1000);
-
-            await _supabase.from('configuracion').upsert({
-                id: 'cronometro',
-                titulo: titulo,
-                tiempoFin: tiempoFin,
-                activo: true
-            });
-            cerrarPanelAdmin();
-        }
-
-        async function desactivarCronometroGlobal() {
-            await _supabase.from('configuracion').upsert({ id: 'cronometro', activo: false });
-            cerrarPanelAdmin();
-        }
-
         async function verificarEstadoGlobalYSaltos() {
             let { data: configs } = await _supabase.from('configuracion').select('*');
             if(!configs) return;
@@ -502,7 +496,6 @@
             const isAdmin = sessionStorage.getItem('smr_is_admin') === 'true';
 
             configs.forEach(c => {
-                // Estado del Portal
                 if(c.id === 'estado_portal') {
                     const pantallaMant = document.getElementById('pantalla-mantenimiento');
                     const btnCerrar = document.getElementById('btn-cerrar-portal');
@@ -525,7 +518,6 @@
                     }
                 }
 
-                // Alertas
                 if(c.id === 'alerta') {
                     if(c.activo) {
                         document.getElementById('texto-alerta-global').textContent = c.mensaje;
@@ -534,35 +526,8 @@
                         document.getElementById('banner-alerta-global').classList.add('hidden');
                     }
                 }
-
-                // Cronómetro corregido
-                if(c.id === 'cronometro') {
-                    if(c.activo) {
-                        window.cronometroFin = c.tiempoFin;
-                        document.getElementById('texto-cronometro-titulo').textContent = c.titulo;
-                        document.getElementById('banner-cronometro').classList.remove('hidden');
-                    } else {
-                        document.getElementById('banner-cronometro').classList.add('hidden');
-                        window.cronometroFin = null;
-                    }
-                }
             });
         }
-
-        // Reloj en marcha
-        setInterval(() => {
-            if(window.cronometroFin) {
-                let ahora = new Date().getTime();
-                let distancia = window.cronometroFin - ahora;
-                if(distancia > 0) {
-                    let min = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
-                    let seg = Math.floor((distancia % (1000 * 60)) / 1000);
-                    document.getElementById('reloj-cuenta-atras').textContent = `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
-                } else {
-                    document.getElementById('banner-cronometro').classList.add('hidden');
-                }
-            }
-        }, 1000);
 
         window.onload = function() {
             const usuarioGuardado = sessionStorage.getItem('smr_current_user');
