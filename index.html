@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal SMR - Tiempo Real Global</title>
+    <title>Portal SMR - Tiempo Real y Gestión de Baneos</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Iconos -->
@@ -79,7 +79,7 @@
                     <div class="bg-rose-500/10 text-rose-400 p-2.5 rounded-xl border border-rose-500/20"><i class="fa-solid fa-toolbox text-lg"></i></div>
                     <div>
                         <h3 class="text-lg font-bold text-white">Panel de Control Pro (Admin)</h3>
-                        <p class="text-xs text-slate-400">Gestión de usuarios, baneos, alertas y cronómetros.</p>
+                        <p class="text-xs text-slate-400">Gestión de usuarios y baneos en tiempo real.</p>
                     </div>
                 </div>
                 <button onclick="cerrarPanelAdmin()" class="text-slate-400 hover:text-white text-sm bg-slate-800 p-2 rounded-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -87,8 +87,14 @@
 
             <!-- LISTA DE USUARIOS -->
             <div class="space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-users-gear text-cyan-400 mr-1.5"></i> Usuarios Conectados en la Nube</h4>
-                <div id="admin-lista-usuarios" class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-2 max-h-40 overflow-y-auto text-xs"></div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-users-gear text-cyan-400 mr-1.5"></i> Usuarios Conectados en Directo</h4>
+                <div id="admin-lista-usuarios" class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-2 max-h-36 overflow-y-auto text-xs"></div>
+            </div>
+
+            <!-- LISTA DE BANEADOS -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-rose-400"><i class="fa-solid fa-ban mr-1.5"></i> Usuarios Baneados (Exclusivo Admin)</h4>
+                <div id="admin-lista-baneados" class="bg-slate-950 border border-rose-500/30 rounded-xl p-3 space-y-2 max-h-36 overflow-y-auto text-xs"></div>
             </div>
 
             <!-- NOTIFICACIÓN GLOBAL -->
@@ -195,10 +201,10 @@
     </main>
 
     <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-400 mt-auto">
-        <p>Portal SMR &bull; Tiempo Real Global con Supabase</p>
+        <p>Portal SMR &bull; Tiempo Real Automático</p>
     </footer>
 
-    <!-- SCRIPT DE CONEXIÓN CON SUPABASE Y LÓGICA MULTICUENTA -->
+    <!-- SCRIPT SUPABASE CON GESTIÓN DE BANEADOS -->
     <script>
         const SUPABASE_URL = 'https://lhzilqmpxvtvpobjzwsi.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_r7HNS4A6VHhGBle8H9ti2w_XaW9qHIm';
@@ -228,7 +234,6 @@
         let usuarioActualId = null;
         let asignaturaActual = '';
 
-        // Credenciales de Admin
         const ADMIN_JAVI = 'Pm70215678a';
         const ADMIN_CHRISTIAN = 'Jp4794115a';
 
@@ -237,7 +242,6 @@
             let input = document.getElementById('username-input').value.trim();
             if(!input) return;
 
-            // Comprobar si es Javi (Admin)
             if(input === ADMIN_JAVI) {
                 sessionStorage.setItem('smr_is_admin', 'true');
                 sessionStorage.setItem('smr_admin_name', 'Javi');
@@ -245,7 +249,6 @@
                 return;
             }
 
-            // Comprobar si es Christian (Admin)
             if(input === ADMIN_CHRISTIAN) {
                 sessionStorage.setItem('smr_is_admin', 'true');
                 sessionStorage.setItem('smr_admin_name', 'Christian');
@@ -255,14 +258,12 @@
 
             let nombreLower = input.toLowerCase();
 
-            // Comprobar baneos
             let { data: baneados } = await _supabase.from('baneados').select('*');
             if(baneados && baneados.some(b => b.nombre.toLowerCase() === nombreLower)) {
                 document.getElementById('error-baneado').classList.remove('hidden');
                 return;
             }
 
-            // Comprobar si ya existe
             let { data: existentes } = await _supabase.from('usuarios_online').select('*');
             let yaExiste = existentes ? existentes.some(u => u.nombre.toLowerCase() === nombreLower) : false;
 
@@ -292,18 +293,19 @@
             document.getElementById('login-modal').classList.add('hidden');
             document.getElementById('user-status-bar').classList.remove('hidden');
             document.getElementById('current-username').textContent = nombre;
-            iniciarEscuchasEnTiempoReal();
+            conectarCanalTiempoReal();
         }
 
         function abrirInterfazAdmin(nombreAdmin) {
             document.getElementById('login-modal').classList.add('hidden');
             document.getElementById('admin-status-bar').classList.remove('hidden');
             document.getElementById('admin-badge-name').innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i> ADMIN (${nombreAdmin})`;
-            iniciarEscuchasEnTiempoReal();
+            conectarCanalTiempoReal();
         }
 
         function abrirPanelAdmin() {
             document.getElementById('admin-modal').classList.remove('hidden');
+            actualizarListasAdmin();
         }
 
         function cerrarPanelAdmin() {
@@ -318,47 +320,80 @@
             location.reload();
         }
 
-        // TIEMPO REAL GLOBAL
-        function iniciarEscuchasEnTiempoReal() {
-            actualizarListaGlobal();
+        function conectarCanalTiempoReal() {
+            actualizarListasAdmin();
             verificarAlertasYCronometros();
 
-            _supabase.channel('cambios_globales')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios_online' }, () => actualizarListaGlobal())
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'configuracion' }, () => verificarAlertasYCronometros())
+            _supabase.channel('portal-smr-live')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios_online' }, payload => {
+                    actualizarListasAdmin();
+                    comprobarSiFuiExpulsado(payload);
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'baneados' }, payload => {
+                    actualizarListasAdmin();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'configuracion' }, payload => {
+                    verificarAlertasYCronometros();
+                })
                 .subscribe();
         }
 
-        async function actualizarListaGlobal() {
+        async function actualizarListasAdmin() {
             let { data: usuarios } = await _supabase.from('usuarios_online').select('*');
-            if(!usuarios) return;
-
-            document.getElementById('online-count').textContent = usuarios.length;
-
-            let contenedor = document.getElementById('admin-lista-usuarios');
-            if(contenedor) {
-                contenedor.innerHTML = '';
-                if(usuarios.length === 0) {
-                    contenedor.innerHTML = '<p class="text-slate-500 italic">No hay usuarios activos.</p>';
-                    return;
+            if(usuarios) {
+                document.getElementById('online-count').textContent = usuarios.length;
+                let contenedorUsuarios = document.getElementById('admin-lista-usuarios');
+                if(contenedorUsuarios) {
+                    contenedorUsuarios.innerHTML = '';
+                    if(usuarios.length === 0) {
+                        contenedorUsuarios.innerHTML = '<p class="text-slate-500 italic">No hay usuarios activos.</p>';
+                    } else {
+                        usuarios.forEach(u => {
+                            contenedorUsuarios.innerHTML += `
+                                <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+                                    <span class="text-white font-medium"><i class="fa-solid fa-circle text-emerald-500 text-[8px] mr-2"></i>${u.nombre}</span>
+                                    <div class="space-x-1">
+                                        <button onclick="desconectarUsuario('${u.id}')" class="bg-amber-500/25 hover:bg-amber-500 text-amber-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold">Desconectar</button>
+                                        <button onclick="banearUsuario('${u.nombre}')" class="bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold">Banear</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
                 }
-                usuarios.forEach(u => {
-                    contenedor.innerHTML += `
-                        <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-800">
-                            <span class="text-white font-medium"><i class="fa-solid fa-circle text-emerald-500 text-[8px] mr-2"></i>${u.nombre}</span>
-                            <div class="space-x-1">
-                                <button onclick="desconectarUsuario('${u.id}')" class="bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold">Desconectar</button>
-                                <button onclick="banearUsuario('${u.nombre}')" class="bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold">Banear</button>
-                            </div>
-                        </div>
-                    `;
-                });
+            }
+
+            let { data: baneados } = await _supabase.from('baneados').select('*');
+            if(baneados) {
+                let contenedorBaneados = document.getElementById('admin-lista-baneados');
+                if(contenedorBaneados) {
+                    contenedorBaneados.innerHTML = '';
+                    if(baneados.length === 0) {
+                        contenedorBaneados.innerHTML = '<p class="text-slate-500 italic">No hay usuarios baneados.</p>';
+                    } else {
+                        baneados.forEach(b => {
+                            contenedorBaneados.innerHTML += `
+                                <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-rose-500/20">
+                                    <span class="text-rose-200 font-medium"><i class="fa-solid fa-ban text-rose-500 text-[10px] mr-2"></i>${b.nombre}</span>
+                                    <button onclick="desbanearUsuario('${b.id}', '${b.nombre}')" class="bg-emerald-500/25 hover:bg-emerald-500 text-emerald-300 hover:text-white px-2.5 py-1 rounded text-[11px] font-bold">Desbanear</button>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+            }
+        }
+
+        async function comprobarSiFuiExpulsado(payload) {
+            if(payload.eventType === 'DELETE' && payload.old.id === usuarioActualId) {
+                alert('Has sido desconectado por el administrador.');
+                sessionStorage.clear();
+                location.reload();
             }
         }
 
         async function desconectarUsuario(id) {
             await _supabase.from('usuarios_online').delete().eq('id', id);
-            actualizarListaGlobal();
         }
 
         async function banearUsuario(nombre) {
@@ -366,11 +401,13 @@
             let { data: usuarios } = await _supabase.from('usuarios_online').select('*');
             let userObj = usuarios.find(u => u.nombre === nombre);
             if(userObj) await _supabase.from('usuarios_online').delete().eq('id', userObj.id);
-            alert(`Usuario ${nombre} baneado correctamente.`);
-            actualizarListaGlobal();
         }
 
-        // ALERTAS Y CRONÓMETROS GLOBALES
+        async function desbanearUsuario(idBaneado, nombre) {
+            await _supabase.from('baneados').delete().eq('id', idBaneado);
+            alert(`Usuario ${nombre} desbaneado correctamente.`);
+        }
+
         async function enviarAvisoGlobal() {
             let texto = document.getElementById('admin-aviso-input').value.trim();
             if(!texto) return;
@@ -378,14 +415,12 @@
             let mensajeCompleto = `Aviso de ${nombreAdmin}: ${texto}`;
 
             await _supabase.from('configuracion').upsert({ id: 'alerta', mensaje: mensajeCompleto, activo: true });
-            alert('¡Alerta enviada a todos!');
             document.getElementById('admin-aviso-input').value = '';
             cerrarPanelAdmin();
         }
 
         async function cerrarAlertaGlobal() {
             await _supabase.from('configuracion').upsert({ id: 'alerta', activo: false });
-            document.getElementById('banner-alerta-global').classList.add('hidden');
         }
 
         async function activarCronometroGlobal() {
@@ -399,14 +434,11 @@
                 tiempoFin: tiempoFin,
                 activo: true
             });
-            alert('¡Cuenta atrás activada globalmente!');
             cerrarPanelAdmin();
         }
 
         async function desactivarCronometroGlobal() {
             await _supabase.from('configuracion').upsert({ id: 'cronometro', activo: false });
-            document.getElementById('banner-cronometro').classList.add('hidden');
-            alert('¡Cuenta atrás desactivada!');
             cerrarPanelAdmin();
         }
 
@@ -463,7 +495,7 @@
             } else {
                 document.getElementById('login-modal').classList.remove('hidden');
             }
-            iniciarEscuchasEnTiempoReal();
+            conectarCanalTiempoReal();
         }
 
         function irInicio() {
