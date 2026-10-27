@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal SMR - Apuntes y Manuales</title>
+    <title>Portal SMR - Tiempo Real</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SDK de Firebase (Compatibles para HTML web) -->
+    <!-- SDK de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
@@ -80,7 +80,7 @@
                     <div class="bg-rose-500/10 text-rose-400 p-2.5 rounded-xl border border-rose-500/20"><i class="fa-solid fa-toolbox text-lg"></i></div>
                     <div>
                         <h3 class="text-lg font-bold text-white">Panel de Control Global (Admin)</h3>
-                        <p class="text-xs text-slate-400">Gestión de usuarios en tiempo real y alertas.</p>
+                        <p class="text-xs text-slate-400">Gestión de usuarios, alertas y cronómetros.</p>
                     </div>
                 </div>
                 <button onclick="cerrarPanelAdmin()" class="text-slate-400 hover:text-white text-sm bg-slate-800 p-2 rounded-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -98,6 +98,19 @@
                     <button onclick="enviarAvisoGlobal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow">Enviar Alerta</button>
                 </div>
             </div>
+
+            <!-- CRONÓMETRO GLOBAL (ACTIVAR / DESACTIVAR) -->
+            <div class="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2"><i class="fa-solid fa-stopwatch mr-1.5"></i> Control de Cuenta Atrás / Cronómetro</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                    <input type="text" id="admin-cronometro-titulo" placeholder="Título (ej: Resumen disponible en:)" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <input type="number" id="admin-cronometro-minutos" placeholder="Minutos restantes" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="activarCronometroGlobal()" class="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs shadow">Activar Cronómetro</button>
+                    <button onclick="desactivarCronometroGlobal()" class="flex-1 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 font-bold py-2.5 rounded-xl text-xs shadow">Desactivar Cronómetro</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -106,6 +119,13 @@
         <i class="fa-solid fa-triangle-exclamation text-base"></i>
         <span id="texto-alerta-global">Aviso del Administrador</span>
         <button onclick="cerrarAlertaGlobal()" class="text-amber-400 hover:text-white ml-4"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- BANNER DE CRONÓMETRO GLOBAL -->
+    <div id="banner-cronometro" class="hidden bg-cyan-500/10 border-b border-cyan-500/30 text-cyan-300 px-6 py-2.5 text-center text-xs font-semibold flex items-center justify-center space-x-3">
+        <i class="fa-solid fa-stopwatch text-base animate-spin"></i>
+        <span id="texto-cronometro-titulo">Evento próximo:</span>
+        <span id="reloj-cuenta-atras" class="font-mono bg-cyan-950 border border-cyan-500/40 px-2.5 py-0.5 rounded text-white font-bold">00:00</span>
     </div>
 
     <!-- CONTENIDO PRINCIPAL -->
@@ -179,7 +199,6 @@
 
     <!-- SCRIPT DE CONFIGURACIÓN Y CONEXIÓN CON FIREBASE -->
     <script>
-        // Tus credenciales oficiales de Firebase ya integradas
         const firebaseConfig = {
             apiKey: "AIzaSyBJ1285jp04-gtQeBHI79tGQCLNcl3gbb4",
             authDomain: "portal-smr-b0cd9.firebaseapp.com",
@@ -190,11 +209,9 @@
             measurementId: "G-GKVN4WWCQ7"
         };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // DATOS DE ASIGNATURAS Y DOCUMENTOS
         const datosAsignaturas = {
             'aplicaciones-web': {
                 nombre: 'Aplicaciones Web',
@@ -218,7 +235,6 @@
         let usuarioActualDocId = '';
         const CLAVE_ADMIN = 'Pm70215678a';
 
-        // GESTIÓN DE SESIÓN Y TIEMPO REAL EN FIRESTORE
         async function iniciarSesion(event) {
             event.preventDefault();
             let input = document.getElementById('username-input').value.trim();
@@ -231,8 +247,6 @@
             }
 
             let nombreLower = input.toLowerCase();
-
-            // Comprobar si ya existe en la nube
             let snapshot = await db.collection('usuarios_online').get();
             let yaExiste = false;
             snapshot.forEach(doc => {
@@ -244,7 +258,6 @@
                 return;
             }
 
-            // Guardar usuario en la base de datos de Firebase
             let docRef = await db.collection('usuarios_online').add({
                 nombre: input,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -285,7 +298,6 @@
             location.reload();
         }
 
-        // ESCUCHAR CAMBIOS EN TIEMPO REAL (CONTADOR Y ADMIN)
         db.collection('usuarios_online').onSnapshot(snapshot => {
             let count = snapshot.size;
             document.getElementById('online-count').textContent = count;
@@ -313,7 +325,6 @@
             await db.collection('usuarios_online').doc(docId).delete();
         }
 
-        // ALERTAS GLOBALES EN TIEMPO REAL
         async function enviarAvisoGlobal() {
             let texto = document.getElementById('admin-aviso-input').value.trim();
             if(!texto) return;
@@ -336,7 +347,54 @@
             await db.collection('configuracion').doc('alerta').set({ activo: false }, { merge: true });
         }
 
-        // NAVEGACIÓN Y CARGA DE CONTENIDO
+        // CRONÓMETRO GLOBAL EN TIEMPO REAL
+        async function activarCronometroGlobal() {
+            let titulo = document.getElementById('admin-cronometro-titulo').value.trim() || 'Evento próximo:';
+            let minutos = parseInt(document.getElementById('admin-cronometro-minutos').value) || 5;
+            let tiempoFin = new Date().getTime() + (minutos * 60 * 1000);
+
+            await db.collection('configuracion').doc('cronometro').set({
+                titulo: titulo,
+                tiempoFin: tiempoFin,
+                activo: true
+            });
+            alert('¡Cuenta atrás activada en la nube!');
+            cerrarPanelAdmin();
+        }
+
+        async function desactivarCronometroGlobal() {
+            await db.collection('configuracion').doc('cronometro').set({ activo: false }, { merge: true });
+            document.getElementById('banner-cronometro').classList.add('hidden');
+            alert('¡Cuenta atrás desactivada!');
+            cerrarPanelAdmin();
+        }
+
+        db.collection('configuracion').doc('cronometro').onSnapshot(doc => {
+            if(doc.exists && doc.data().activo) {
+                window.cronometroFin = doc.data().tiempoFin;
+                window.cronometroTitulo = doc.data().titulo;
+                document.getElementById('texto-cronometro-titulo').textContent = window.cronometroTitulo;
+                document.getElementById('banner-cronometro').classList.remove('hidden');
+            } else {
+                document.getElementById('banner-cronometro').classList.add('hidden');
+                window.cronometroFin = null;
+            }
+        });
+
+        setInterval(() => {
+            if(window.cronometroFin) {
+                let ahora = new Date().getTime();
+                let distancia = window.cronometroFin - ahora;
+                if(distancia > 0) {
+                    let min = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
+                    let seg = Math.floor((distancia % (1000 * 60)) / 1000);
+                    document.getElementById('reloj-cuenta-atras').textContent = `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+                } else {
+                    document.getElementById('banner-cronometro').classList.add('hidden');
+                }
+            }
+        }, 1000);
+
         window.onload = function() {
             const usuarioGuardado = sessionStorage.getItem('smr_current_user');
             const isAdmin = sessionStorage.getItem('smr_is_admin');
