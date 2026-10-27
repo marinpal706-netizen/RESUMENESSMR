@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal SMR - Tiempo Real</title>
+    <title>Portal SMR - Apuntes y Manuales</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SDK de Firebase (Base de datos en tiempo real global) -->
+    <!-- SDK de Firebase (Compatibles para HTML web) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
@@ -177,18 +177,20 @@
         <p>Portal SMR &bull; Tiempo Real con Firebase</p>
     </footer>
 
-    <!-- SCRIPT DE CONFIGURACIÓN Y TIEMPO REAL -->
+    <!-- SCRIPT DE CONFIGURACIÓN Y CONEXIÓN CON FIREBASE -->
     <script>
-        // 🔴 1. PEGA AQUÍ TUS CREDENCIALES DE FIREBASE (OBTENIDAS EN EL PASO 1)
+        // Tus credenciales oficiales de Firebase ya integradas
         const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "tu-proyecto.firebaseapp.com",
-            projectId: "tu-proyecto",
-            storageBucket: "tu-proyecto.appspot.com",
-            messagingSenderId: "tu-sender-id",
-            appId: "tu-app-id"
+            apiKey: "AIzaSyBJ1285jp04-gtQeBHI79tGQCLNcl3gbb4",
+            authDomain: "portal-smr-b0cd9.firebaseapp.com",
+            projectId: "portal-smr-b0cd9",
+            storageBucket: "portal-smr-b0cd9.firebasestorage.app",
+            messagingSenderId: "625124278340",
+            appId: "1:625124278340:web:2ba30e63c27b29a3223c11",
+            measurementId: "G-GKVN4WWCQ7"
         };
 
+        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -348,13 +350,6 @@
                 document.getElementById('login-modal').classList.remove('hidden');
             }
         }
-
-        // Borrar de la base de datos si cierran la pestaña de golpe
-        window.addEventListener('beforeunload', () => {
-            if(usuarioActualDocId) {
-                navigator.sendBeacon ? null : null; // Firebase cloud cleanup gestiona sesiones inactivas
-            }
-        });
 
         function irInicio() {
             document.getElementById('pagina-inicio').classList.remove('hidden');
