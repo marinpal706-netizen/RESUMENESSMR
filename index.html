@@ -34,7 +34,7 @@
 
             <div id="admin-status-bar" class="hidden flex items-center space-x-2 bg-rose-500/10 border border-rose-500/30 px-3.5 py-1.5 rounded-full text-sm">
                 <span class="w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping"></span>
-                <span class="text-rose-300 text-xs font-bold"><i class="fa-solid fa-shield-halved mr-1"></i> ADMIN</span>
+                <span id="admin-badge-name" class="text-rose-300 text-xs font-bold"><i class="fa-solid fa-shield-halved mr-1"></i> ADMIN</span>
                 <button onclick="abrirPanelAdmin()" class="ml-2 bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold text-xs px-2.5 py-1 rounded-lg">Panel Pro</button>
                 <button onclick="cerrarSesion()" class="ml-1 text-slate-400 hover:text-white text-xs"><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
@@ -61,9 +61,10 @@
             
             <form onsubmit="iniciarSesion(event)" class="space-y-4">
                 <div>
-                    <input type="text" id="username-input" required placeholder="Ej: Manolo Liria" 
+                    <input type="text" id="username-input" required placeholder="Ej: Manolo Liria o Contraseña Admin" 
                         class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 shadow-inner">
                     <p id="error-nombre" class="text-rose-400 text-xs mt-2 hidden"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Este nombre ya está en uso. Añade tu apellido.</p>
+                    <p id="error-baneado" class="text-rose-400 text-xs mt-2 hidden"><i class="fa-solid fa-ban mr-1"></i> Estás baneado de este portal.</p>
                 </div>
                 <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 rounded-xl transition-all shadow-lg shadow-cyan-500/20 text-sm">Entrar al Portal</button>
             </form>
@@ -77,18 +78,55 @@
                 <div class="flex items-center space-x-3">
                     <div class="bg-rose-500/10 text-rose-400 p-2.5 rounded-xl border border-rose-500/20"><i class="fa-solid fa-toolbox text-lg"></i></div>
                     <div>
-                        <h3 class="text-lg font-bold text-white">Panel de Control Global (Admin)</h3>
-                        <p class="text-xs text-slate-400">Gestión de usuarios en tiempo real.</p>
+                        <h3 class="text-lg font-bold text-white">Panel de Control Pro (Admin)</h3>
+                        <p class="text-xs text-slate-400">Gestión de usuarios, baneos, alertas y cronómetros.</p>
                     </div>
                 </div>
                 <button onclick="cerrarPanelAdmin()" class="text-slate-400 hover:text-white text-sm bg-slate-800 p-2 rounded-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
+            <!-- LISTA DE USUARIOS -->
             <div class="space-y-3">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-users-gear text-cyan-400 mr-1.5"></i> Usuarios Conectados en la Nube</h4>
                 <div id="admin-lista-usuarios" class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-2 max-h-40 overflow-y-auto text-xs"></div>
             </div>
+
+            <!-- NOTIFICACIÓN GLOBAL -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-bullhorn text-amber-400 mr-1.5"></i> Notificación Global en Vivo</h4>
+                <div class="flex space-x-2">
+                    <input type="text" id="admin-aviso-input" placeholder="Escribe un aviso para todos..." class="flex-grow bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <button onclick="enviarAvisoGlobal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow">Enviar Alerta</button>
+                </div>
+            </div>
+
+            <!-- CRONÓMETRO GLOBAL -->
+            <div class="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2"><i class="fa-solid fa-stopwatch mr-1.5"></i> Control de Cuenta Atrás / Horario</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                    <input type="text" id="admin-cronometro-titulo" placeholder="Título (ej: Entrega de Práctica en:)" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <input type="number" id="admin-cronometro-minutos" placeholder="Minutos restantes" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="activarCronometroGlobal()" class="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs shadow">Activar Cronómetro</button>
+                    <button onclick="desactivarCronometroGlobal()" class="flex-1 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 font-bold py-2.5 rounded-xl text-xs shadow">Desactivar Cronómetro</button>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <!-- BANNER DE ALERTA GLOBAL -->
+    <div id="banner-alerta-global" class="hidden bg-amber-500/10 border-b border-amber-500/30 text-amber-300 px-6 py-3 text-center text-xs font-bold flex items-center justify-center space-x-3 shadow-md animate-pulse">
+        <i class="fa-solid fa-triangle-exclamation text-base"></i>
+        <span id="texto-alerta-global">Aviso del Administrador</span>
+        <button onclick="cerrarAlertaGlobal()" class="text-amber-400 hover:text-white ml-4"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- BANNER DE CRONÓMETRO GLOBAL -->
+    <div id="banner-cronometro" class="hidden bg-cyan-500/10 border-b border-cyan-500/30 text-cyan-300 px-6 py-2.5 text-center text-xs font-semibold flex items-center justify-center space-x-3">
+        <i class="fa-solid fa-stopwatch text-base animate-spin"></i>
+        <span id="texto-cronometro-titulo">Evento próximo:</span>
+        <span id="reloj-cuenta-atras" class="font-mono bg-cyan-950 border border-cyan-500/40 px-2.5 py-0.5 rounded text-white font-bold">00:00</span>
     </div>
 
     <!-- CONTENIDO PRINCIPAL -->
@@ -160,7 +198,7 @@
         <p>Portal SMR &bull; Tiempo Real Global con Supabase</p>
     </footer>
 
-    <!-- SCRIPT DE CONEXIÓN CON SUPABASE -->
+    <!-- SCRIPT DE CONEXIÓN CON SUPABASE Y LÓGICA MULTICUENTA -->
     <script>
         const SUPABASE_URL = 'https://lhzilqmpxvtvpobjzwsi.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_r7HNS4A6VHhGBle8H9ti2w_XaW9qHIm';
@@ -189,21 +227,42 @@
 
         let usuarioActualId = null;
         let asignaturaActual = '';
-        const CLAVE_ADMIN = 'Pm70215678a';
+
+        // Credenciales de Admin
+        const ADMIN_JAVI = 'Pm70215678a';
+        const ADMIN_CHRISTIAN = 'Jp4794115a';
 
         async function iniciarSesion(event) {
             event.preventDefault();
             let input = document.getElementById('username-input').value.trim();
             if(!input) return;
 
-            if(input === CLAVE_ADMIN) {
+            // Comprobar si es Javi (Admin)
+            if(input === ADMIN_JAVI) {
                 sessionStorage.setItem('smr_is_admin', 'true');
-                abrirInterfazAdmin();
+                sessionStorage.setItem('smr_admin_name', 'Javi');
+                abrirInterfazAdmin('Javi');
+                return;
+            }
+
+            // Comprobar si es Christian (Admin)
+            if(input === ADMIN_CHRISTIAN) {
+                sessionStorage.setItem('smr_is_admin', 'true');
+                sessionStorage.setItem('smr_admin_name', 'Christian');
+                abrirInterfazAdmin('Christian');
                 return;
             }
 
             let nombreLower = input.toLowerCase();
 
+            // Comprobar baneos
+            let { data: baneados } = await _supabase.from('baneados').select('*');
+            if(baneados && baneados.some(b => b.nombre.toLowerCase() === nombreLower)) {
+                document.getElementById('error-baneado').classList.remove('hidden');
+                return;
+            }
+
+            // Comprobar si ya existe
             let { data: existentes } = await _supabase.from('usuarios_online').select('*');
             let yaExiste = existentes ? existentes.some(u => u.nombre.toLowerCase() === nombreLower) : false;
 
@@ -218,7 +277,7 @@
                 .select();
 
             if(error) {
-                alert('Error al conectar con la base de datos. Asegúrate de haber creado la columna "nombre" en Supabase.');
+                alert('Error al conectar con la base de datos.');
                 return;
             }
 
@@ -233,13 +292,14 @@
             document.getElementById('login-modal').classList.add('hidden');
             document.getElementById('user-status-bar').classList.remove('hidden');
             document.getElementById('current-username').textContent = nombre;
-            escucharUsuariosEnTiempoReal();
+            iniciarEscuchasEnTiempoReal();
         }
 
-        function abrirInterfazAdmin() {
+        function abrirInterfazAdmin(nombreAdmin) {
             document.getElementById('login-modal').classList.add('hidden');
             document.getElementById('admin-status-bar').classList.remove('hidden');
-            escucharUsuariosEnTiempoReal();
+            document.getElementById('admin-badge-name').innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i> ADMIN (${nombreAdmin})`;
+            iniciarEscuchasEnTiempoReal();
         }
 
         function abrirPanelAdmin() {
@@ -258,13 +318,14 @@
             location.reload();
         }
 
-        function escucharUsuariosEnTiempoReal() {
+        // TIEMPO REAL GLOBAL
+        function iniciarEscuchasEnTiempoReal() {
             actualizarListaGlobal();
-            _supabase
-                .channel('cambios_usuarios')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios_online' }, payload => {
-                    actualizarListaGlobal();
-                })
+            verificarAlertasYCronometros();
+
+            _supabase.channel('cambios_globales')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios_online' }, () => actualizarListaGlobal())
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'configuracion' }, () => verificarAlertasYCronometros())
                 .subscribe();
         }
 
@@ -285,31 +346,124 @@
                     contenedor.innerHTML += `
                         <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-800">
                             <span class="text-white font-medium"><i class="fa-solid fa-circle text-emerald-500 text-[8px] mr-2"></i>${u.nombre}</span>
-                            <button onclick="forzarDesconexion('${u.id}')" class="bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white px-2.5 py-1 rounded text-[11px] font-bold">Desconectar</button>
+                            <div class="space-x-1">
+                                <button onclick="desconectarUsuario('${u.id}')" class="bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold">Desconectar</button>
+                                <button onclick="banearUsuario('${u.nombre}')" class="bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold">Banear</button>
+                            </div>
                         </div>
                     `;
                 });
             }
         }
 
-        async function forzarDesconexion(id) {
+        async function desconectarUsuario(id) {
             await _supabase.from('usuarios_online').delete().eq('id', id);
             actualizarListaGlobal();
         }
 
+        async function banearUsuario(nombre) {
+            await _supabase.from('baneados').insert([{ nombre: nombre }]);
+            let { data: usuarios } = await _supabase.from('usuarios_online').select('*');
+            let userObj = usuarios.find(u => u.nombre === nombre);
+            if(userObj) await _supabase.from('usuarios_online').delete().eq('id', userObj.id);
+            alert(`Usuario ${nombre} baneado correctamente.`);
+            actualizarListaGlobal();
+        }
+
+        // ALERTAS Y CRONÓMETROS GLOBALES
+        async function enviarAvisoGlobal() {
+            let texto = document.getElementById('admin-aviso-input').value.trim();
+            if(!texto) return;
+            let nombreAdmin = sessionStorage.getItem('smr_admin_name') || 'Admin';
+            let mensajeCompleto = `Aviso de ${nombreAdmin}: ${texto}`;
+
+            await _supabase.from('configuracion').upsert({ id: 'alerta', mensaje: mensajeCompleto, activo: true });
+            alert('¡Alerta enviada a todos!');
+            document.getElementById('admin-aviso-input').value = '';
+            cerrarPanelAdmin();
+        }
+
+        async function cerrarAlertaGlobal() {
+            await _supabase.from('configuracion').upsert({ id: 'alerta', activo: false });
+            document.getElementById('banner-alerta-global').classList.add('hidden');
+        }
+
+        async function activarCronometroGlobal() {
+            let titulo = document.getElementById('admin-cronometro-titulo').value.trim() || 'Evento próximo:';
+            let minutos = parseInt(document.getElementById('admin-cronometro-minutos').value) || 5;
+            let tiempoFin = new Date().getTime() + (minutos * 60 * 1000);
+
+            await _supabase.from('configuracion').upsert({
+                id: 'cronometro',
+                titulo: titulo,
+                tiempoFin: tiempoFin,
+                activo: true
+            });
+            alert('¡Cuenta atrás activada globalmente!');
+            cerrarPanelAdmin();
+        }
+
+        async function desactivarCronometroGlobal() {
+            await _supabase.from('configuracion').upsert({ id: 'cronometro', activo: false });
+            document.getElementById('banner-cronometro').classList.add('hidden');
+            alert('¡Cuenta atrás desactivada!');
+            cerrarPanelAdmin();
+        }
+
+        async function verificarAlertasYCronometros() {
+            let { data: configs } = await _supabase.from('configuracion').select('*');
+            if(!configs) return;
+
+            configs.forEach(c => {
+                if(c.id === 'alerta') {
+                    if(c.activo) {
+                        document.getElementById('texto-alerta-global').textContent = c.mensaje;
+                        document.getElementById('banner-alerta-global').classList.remove('hidden');
+                    } else {
+                        document.getElementById('banner-alerta-global').classList.add('hidden');
+                    }
+                }
+                if(c.id === 'cronometro') {
+                    if(c.activo) {
+                        window.cronometroFin = c.tiempoFin;
+                        document.getElementById('texto-cronometro-titulo').textContent = c.titulo;
+                        document.getElementById('banner-cronometro').classList.remove('hidden');
+                    } else {
+                        document.getElementById('banner-cronometro').classList.add('hidden');
+                        window.cronometroFin = null;
+                    }
+                }
+            });
+        }
+
+        setInterval(() => {
+            if(window.cronometroFin) {
+                let ahora = new Date().getTime();
+                let distancia = window.cronometroFin - ahora;
+                if(distancia > 0) {
+                    let min = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
+                    let seg = Math.floor((distancia % (1000 * 60)) / 1000);
+                    document.getElementById('reloj-cuenta-atras').textContent = `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+                } else {
+                    document.getElementById('banner-cronometro').classList.add('hidden');
+                }
+            }
+        }, 1000);
+
         window.onload = function() {
             const usuarioGuardado = sessionStorage.getItem('smr_current_user');
             const isAdmin = sessionStorage.getItem('smr_is_admin');
+            const adminName = sessionStorage.getItem('smr_admin_name');
             usuarioActualId = sessionStorage.getItem('smr_user_id');
 
             if(isAdmin === 'true') {
-                abrirInterfazAdmin();
+                abrirInterfazAdmin(adminName || 'Admin');
             } else if(usuarioGuardado) {
                 abrirInterfazUsuario(usuarioGuardado);
             } else {
                 document.getElementById('login-modal').classList.remove('hidden');
             }
-            escucharUsuariosEnTiempoReal();
+            iniciarEscuchasEnTiempoReal();
         }
 
         function irInicio() {
