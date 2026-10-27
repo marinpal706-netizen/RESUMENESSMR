@@ -65,7 +65,6 @@
                     <input type="text" id="username-input" required placeholder="Ej: Manolo Liria" 
                         class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 shadow-inner">
                     <p id="error-nombre" class="text-rose-400 text-xs mt-2 hidden"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Este nombre ya está en uso. Añade tu apellido.</p>
-                    <p id="error-baneado" class="text-rose-400 text-xs mt-2 hidden"><i class="fa-solid fa-ban mr-1"></i> Estás baneado de este portal.</p>
                 </div>
                 <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 rounded-xl transition-all shadow-lg shadow-cyan-500/20 text-sm">Entrar al Portal</button>
             </form>
@@ -273,7 +272,7 @@
                 abrirInterfazUsuario(input);
             } catch (error) {
                 console.error("Error al conectar con Firebase:", error);
-                alert("Error de conexión con Firebase. Comprueba la consola (F12) y las reglas de Firestore.");
+                alert("Error al conectar con la base de datos. Revisa las reglas de Firestore.");
             }
         }
 
@@ -307,5 +306,7 @@
             location.reload();
         }
 
+        // ESCUCHAR EN TIEMPO REAL SOLO EL CONTADOR Y LA LISTA DE ADMIN (SIN INTERFERIR EN EL LOGIN)
         db.collection('usuarios_online').onSnapshot(snapshot => {
-            let 
+            let count = snapshot.size;
+            document.getElementById('online-c
