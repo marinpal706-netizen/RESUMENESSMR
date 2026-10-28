@@ -107,15 +107,15 @@
                 <button onclick="cerrarPanelAdmin()" class="text-slate-400 hover:text-white text-sm bg-slate-800 p-2 rounded-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <!-- INTERRUPTOR DE ESTADO DE LA PÁGINA -->
+            <!-- INTERRUPTOR DE ESTADO DE LA PÁGINA (SIEMPRE VISIBLES AMBOS BOTONES) -->
             <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
                 <div>
                     <h4 class="text-xs font-bold uppercase tracking-wider text-white"><i class="fa-solid fa-power-off text-cyan-400 mr-1.5"></i> Estado del Portal</h4>
-                    <p class="text-[11px] text-slate-400">Si lo cierras, los usuarios verán la pantalla de mantenimiento.</p>
+                    <p class="text-[11px] text-slate-400" id="estado-portal-texto">Estado actual: Abierto</p>
                 </div>
-                <div id="contenedor-boton-estado">
-                    <button onclick="cambiarEstadoPortal(false)" id="btn-cerrar-portal" class="bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow transition-all">Cerrar Portal</button>
-                    <button onclick="cambiarEstadoPortal(true)" id="btn-abrir-portal" class="hidden bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow transition-all">Abrir Portal</button>
+                <div class="flex space-x-2">
+                    <button onclick="cambiarEstadoPortal(false)" class="bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow transition-all">Cerrar Portal</button>
+                    <button onclick="cambiarEstadoPortal(true)" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow transition-all">Abrir Portal</button>
                 </div>
             </div>
 
@@ -603,7 +603,6 @@
         }
         async function desbanearUsuario(idBaneado) { await _supabase.from('baneados').delete().eq('id', idBaneado); }
 
-        // CAMBIAR ESTADO DEL PORTAL (ABIERTO / CERRADO)
         async function cambiarEstadoPortal(abierto) {
             await _supabase.from('configuracion').upsert({ id: 'estado_portal', activo: abierto });
             verificarEstadoGlobalYSaltos();
@@ -627,8 +626,7 @@
             configs.forEach(c => {
                 if(c.id === 'estado_portal') {
                     let mant = document.getElementById('pantalla-mantenimiento');
-                    let btnCerrar = document.getElementById('btn-cerrar-portal');
-                    let btnAbrir = document.getElementById('btn-abrir-portal');
+                    let textoEstado = document.getElementById('estado-portal-texto');
 
                     if(c.activo === false && !isAdmin) {
                         mant.classList.remove('hidden');
@@ -636,13 +634,13 @@
                         mant.classList.add('hidden');
                     }
 
-                    if(btnCerrar && btnAbrir) {
+                    if(textoEstado) {
                         if(c.activo === false) {
-                            btnCerrar.classList.add('hidden');
-                            btnAbrir.classList.remove('hidden');
+                            textoEstado.textContent = "Estado actual: Cerrado (Mantenimiento)";
+                            textoEstado.className = "text-[11px] text-rose-400 font-bold";
                         } else {
-                            btnCerrar.classList.remove('hidden');
-                            btnAbrir.classList.add('hidden');
+                            textoEstado.textContent = "Estado actual: Abierto";
+                            textoEstado.className = "text-[11px] text-emerald-400 font-bold";
                         }
                     }
                 }
