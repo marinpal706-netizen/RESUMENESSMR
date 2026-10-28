@@ -230,10 +230,11 @@
         let usuarioActualId = null;
         let asignaturaActualId = null;
         let apartadoActualId = null;
-        let tipoCreacionActual = ''; // 'asignatura', 'apartado', 'documento'
+        let tipoCreacionActual = '';
 
-        const ADMIN_JAVI = 'Pm70215678a';
-        const ADMIN_CHRISTIAN = 'Jp4794115a';
+        // NUEVAS CONTRASEÑAS DE ADMINISTRADOR
+        const ADMIN_JAVI = 'javierpalacios1234';
+        const ADMIN_CHRISTIAN = 'christiandiaz4321';
 
         async function iniciarSesion(event) {
             event.preventDefault();
@@ -300,7 +301,6 @@
             document.getElementById('admin-badge-name').innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i> ADMIN (${nombreAdmin})`;
             document.getElementById('pantalla-mantenimiento').classList.add('hidden');
             
-            // Mostrar botones de creación admin
             document.getElementById('btn-crear-asignatura').classList.remove('hidden');
             document.getElementById('btn-crear-apartado').classList.remove('hidden');
             document.getElementById('btn-crear-documento').classList.remove('hidden');
@@ -325,7 +325,6 @@
             location.reload();
         }
 
-        // ACCESO DE EMERGENCIA
         function toggleAdminEmergencia() {
             let form = document.getElementById('form-admin-emergencia');
             form.classList.toggle('hidden');
@@ -348,7 +347,6 @@
             }
         }
 
-        // MOTOR EN TIEMPO REAL
         function conectarCanalTiempoReal() {
             cargarAsignaturas();
             actualizarListasAdmin();
@@ -372,7 +370,6 @@
                 .subscribe();
         }
 
-        // GESTIÓN DE CONTENIDO DINÁMICO (ASIGNATURAS, TEMAS, DOCUMENTOS)
         async function cargarAsignaturas() {
             let { data: asignaturas } = await _supabase.from('contenido_portal').select('*').eq('tipo', 'asignatura');
             let contenedor = document.getElementById('lista-asignaturas');
@@ -472,7 +469,6 @@
             document.getElementById('pagina-documentos').classList.remove('hidden');
         }
 
-        // MODALES PARA AÑADIR
         function mostrarModalCrearAsignatura() {
             tipoCreacionActual = 'asignatura';
             document.getElementById('modal-titulo').textContent = 'Crear Nueva Asignatura';
@@ -543,7 +539,6 @@
             }
         }
 
-        // FUNCIONES DE USUARIOS Y ADMINS
         async function actualizarListasAdmin() {
             let { data: usuarios } = await _supabase.from('usuarios_online').select('*');
             if(usuarios) {
