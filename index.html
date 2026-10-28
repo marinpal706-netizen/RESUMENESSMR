@@ -107,15 +107,15 @@
                 <button onclick="cerrarPanelAdmin()" class="text-slate-400 hover:text-white text-sm bg-slate-800 p-2 rounded-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <!-- INTERRUPTOR DE ESTADO DE LA PÁGINA (SIEMPRE VISIBLES AMBOS BOTONES) -->
+            <!-- INTERRUPTOR DE ESTADO DE LA PÁGINA (CON AMBOS BOTONES VISIBLES) -->
             <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
                 <div>
                     <h4 class="text-xs font-bold uppercase tracking-wider text-white"><i class="fa-solid fa-power-off text-cyan-400 mr-1.5"></i> Estado del Portal</h4>
-                    <p class="text-[11px] text-slate-400" id="estado-portal-texto">Estado actual: Abierto</p>
+                    <p class="text-[11px]" id="estado-portal-texto">Carga estado...</p>
                 </div>
                 <div class="flex space-x-2">
-                    <button onclick="cambiarEstadoPortal(false)" class="bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow transition-all">Cerrar Portal</button>
-                    <button onclick="cambiarEstadoPortal(true)" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow transition-all">Abrir Portal</button>
+                    <button onclick="cambiarEstadoPortal(false)" class="bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs shadow transition-all">Cerrar Portal</button>
+                    <button onclick="cambiarEstadoPortal(true)" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs shadow transition-all">Abrir Portal</button>
                 </div>
             </div>
 
