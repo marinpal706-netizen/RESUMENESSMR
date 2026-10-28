@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal SMR - Tiempo Real y Control Total</title>
+    <title>Portal SMR - Gestión Dinámica en Tiempo Real</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Iconos -->
@@ -21,7 +21,6 @@
         <h1 class="text-3xl font-black text-white mb-2">Portal en Mantenimiento / Cerrado</h1>
         <p class="text-slate-400 text-sm max-w-md mx-auto mb-6">Los administradores han cerrado temporalmente el portal.</p>
         
-        <!-- Acceso de emergencia para administradores si la web está cerrada -->
         <div class="border-t border-slate-900 pt-6 w-full max-w-xs">
             <button onclick="toggleAdminEmergencia()" class="text-xs text-slate-500 hover:text-cyan-400 transition-colors font-medium">
                 <i class="fa-solid fa-key mr-1"></i> ¿Eres Admin? Acceso de Emergencia
@@ -162,64 +161,65 @@
                 <p class="text-slate-400 text-sm max-w-xl mx-auto">La plataforma oficial para compartir resúmenes y manuales de clase.</p>
             </div>
 
-            <div class="text-center mb-6">
-                <h3 class="text-xl font-bold text-white">Selecciona una Asignatura</h3>
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white">Asignaturas Disponibles</h3>
+                <button id="btn-crear-asignatura" onclick="mostrarModalCrearAsignatura()" class="hidden bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center space-x-2">
+                    <i class="fa-solid fa-plus"></i> <span>Añadir Asignatura</span>
+                </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div onclick="abrirAsignatura('aplicaciones-web')" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-8 rounded-2xl cursor-pointer transition-all shadow-xl flex items-center space-x-6 group">
-                    <div class="bg-blue-500/10 text-blue-400 border border-blue-500/20 p-5 rounded-2xl text-3xl"><i class="fa-solid fa-globe"></i></div>
-                    <div>
-                        <h3 class="text-xl font-bold text-white mb-1 group-hover:text-cyan-400">Aplicaciones Web</h3>
-                        <p class="text-xs text-slate-400">Despliegue y servidores.</p>
-                    </div>
-                </div>
-                <div onclick="abrirAsignatura('seguridad-informatica')" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-8 rounded-2xl cursor-pointer transition-all shadow-xl flex items-center space-x-6 group">
-                    <div class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 p-5 rounded-2xl text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
-                    <div>
-                        <h3 class="text-xl font-bold text-white mb-1 group-hover:text-cyan-400">Seguridad Informática</h3>
-                        <p class="text-xs text-slate-400">Criptografía y auditorías.</p>
-                    </div>
-                </div>
-                <div onclick="abrirAsignatura('servicios-en-red')" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-8 rounded-2xl cursor-pointer transition-all shadow-xl flex items-center space-x-6 group">
-                    <div class="bg-purple-500/10 text-purple-400 border border-purple-500/20 p-5 rounded-2xl text-3xl"><i class="fa-solid fa-network-wired"></i></div>
-                    <div>
-                        <h3 class="text-xl font-bold text-white mb-1 group-hover:text-cyan-400">Servicios en Red</h3>
-                        <p class="text-xs text-slate-400">DNS, DHCP, FTP.</p>
-                    </div>
-                </div>
-                <div onclick="abrirAsignatura('sistemas-operativos')" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-8 rounded-2xl cursor-pointer transition-all shadow-xl flex items-center space-x-6 group">
-                    <div class="bg-amber-500/10 text-amber-400 border border-amber-500/20 p-5 rounded-2xl text-3xl group-hover:scale-110"><i class="fa-solid fa-server"></i></div>
-                    <div>
-                        <h3 class="text-xl font-bold text-white mb-1 group-hover:text-cyan-400">Sistemas Operativos en Red</h3>
-                        <p class="text-xs text-slate-400">Active Directory y Linux.</p>
-                    </div>
-                </div>
-            </div>
+            <div id="lista-asignaturas" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </div>
 
         <div id="pagina-asignatura" class="hidden space-y-6">
-            <button onclick="irInicio()" class="text-cyan-400 hover:text-cyan-300 text-xs font-bold flex items-center space-x-2 bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl w-fit">
-                <i class="fa-solid fa-arrow-left"></i> <span>Volver a Asignaturas</span>
-            </button>
+            <div class="flex justify-between items-center">
+                <button onclick="irInicio()" class="text-cyan-400 hover:text-cyan-300 text-xs font-bold flex items-center space-x-2 bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl w-fit">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Volver a Asignaturas</span>
+                </button>
+                <button id="btn-crear-apartado" onclick="mostrarModalCrearApartado()" class="hidden bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center space-x-2">
+                    <i class="fa-solid fa-plus"></i> <span>Añadir Tema</span>
+                </button>
+            </div>
             <h2 id="titulo-asignatura-seleccionada" class="text-3xl font-extrabold text-white mb-1">Nombre Asignatura</h2>
             <div id="lista-apartados" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
         </div>
 
         <div id="pagina-documentos" class="hidden space-y-6">
-            <button onclick="volverAAsignatura()" class="text-cyan-400 hover:text-cyan-300 text-xs font-bold flex items-center space-x-2 bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl w-fit">
-                <i class="fa-solid fa-arrow-left"></i> <span>Volver a Apartados</span>
-            </button>
-            <h2 id="titulo-apartado-seleccionado" class="text-3xl font-extrabold text-white mb-1">Nombre del Apartado</h2>
+            <div class="flex justify-between items-center">
+                <button onclick="volverAAsignatura()" class="text-cyan-400 hover:text-cyan-300 text-xs font-bold flex items-center space-x-2 bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl w-fit">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Volver a Temas</span>
+                </button>
+                <button id="btn-crear-documento" onclick="mostrarModalCrearDocumento()" class="hidden bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center space-x-2">
+                    <i class="fa-solid fa-plus"></i> <span>Añadir Documento</span>
+                </button>
+            </div>
+            <h2 id="titulo-apartado-seleccionado" class="text-3xl font-extrabold text-white mb-1">Nombre del Tema</h2>
             <div id="lista-documentos" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </main>
 
+    <!-- MODALES DE CREACIÓN DINÁMICA -->
+    <div id="modal-creacion" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <h3 id="modal-titulo" class="text-lg font-bold text-white">Crear Elemento</h3>
+            <form onsubmit="guardarElementoDinamico(event)" class="space-y-3">
+                <input type="text" id="input-nombre-elemento" required placeholder="Nombre..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                <div id="contenedor-input-enlace" class="hidden">
+                    <input type="text" id="input-enlace-elemento" placeholder="Enlace del documento (ej: archivos/manual.pdf o URL)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div class="flex space-x-2 pt-2">
+                    <button type="submit" class="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs shadow">Guardar</button>
+                    <button type="button" onclick="cerrarModalCreacion()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-400 mt-auto">
-        <p>Portal SMR &bull; Control Total en Tiempo Real</p>
+        <p>Portal SMR &bull; Gestión Dinámica en Tiempo Real</p>
     </footer>
 
-    <!-- SCRIPT DE LÓGICA Y TIEMPO REAL -->
+    <!-- SCRIPT DE LÓGICA Y GESTIÓN DINÁMICA -->
     <script>
         const SUPABASE_URL = 'https://lhzilqmpxvtvpobjzwsi.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_r7HNS4A6VHhGBle8H9ti2w_XaW9qHIm';
@@ -227,27 +227,10 @@
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const datosAsignaturas = {
-            'aplicaciones-web': {
-                nombre: 'Aplicaciones Web',
-                apartados: [{ id: 'aw-tema1', nombre: 'Tema 1: Servidores Web', documentos: [{ titulo: 'Resumen Apache', enlace: 'archivos/apache.pdf' }] }]
-            },
-            'seguridad-informatica': {
-                nombre: 'Seguridad Informática',
-                apartados: [{ id: 'seg-tema1', nombre: 'Tema 1: Criptografía', documentos: [{ titulo: 'Apuntes SSL', enlace: 'archivos/cripto.pdf' }] }]
-            },
-            'servicios-en-red': {
-                nombre: 'Servicios en Red',
-                apartados: [{ id: 'serv-tema1', nombre: 'Tema 1: DNS', documentos: [{ titulo: 'Manual Bind9', enlace: 'archivos/dns.pdf' }] }]
-            },
-            'sistemas-operativos': {
-                nombre: 'Sistemas Operativos en Red',
-                apartados: [{ id: 'sor-tema1', nombre: 'Tema 1: Active Directory', documentos: [{ titulo: 'Guía Windows Server', enlace: 'archivos/ad.pdf' }] }]
-            }
-        };
-
         let usuarioActualId = null;
-        let asignaturaActual = '';
+        let asignaturaActualId = null;
+        let apartadoActualId = null;
+        let tipoCreacionActual = ''; // 'asignatura', 'apartado', 'documento'
 
         const ADMIN_JAVI = 'Pm70215678a';
         const ADMIN_CHRISTIAN = 'Jp4794115a';
@@ -316,6 +299,12 @@
             document.getElementById('admin-status-bar').classList.remove('hidden');
             document.getElementById('admin-badge-name').innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i> ADMIN (${nombreAdmin})`;
             document.getElementById('pantalla-mantenimiento').classList.add('hidden');
+            
+            // Mostrar botones de creación admin
+            document.getElementById('btn-crear-asignatura').classList.remove('hidden');
+            document.getElementById('btn-crear-apartado').classList.remove('hidden');
+            document.getElementById('btn-crear-documento').classList.remove('hidden');
+
             conectarCanalTiempoReal();
         }
 
@@ -336,7 +325,7 @@
             location.reload();
         }
 
-        // ACCESO DE EMERGENCIA DESDE LA PANTALLA DE MANTENIMIENTO
+        // ACCESO DE EMERGENCIA
         function toggleAdminEmergencia() {
             let form = document.getElementById('form-admin-emergencia');
             form.classList.toggle('hidden');
@@ -347,7 +336,6 @@
             if(pass === ADMIN_JAVI) {
                 sessionStorage.setItem('smr_is_admin', 'true');
                 sessionStorage.setItem('smr_admin_name', 'Javi');
-                // Abrir portal automáticamente al entrar como admin
                 await cambiarEstadoPortal(true);
                 abrirInterfazAdmin('Javi');
             } else if(pass === ADMIN_CHRISTIAN) {
@@ -356,16 +344,17 @@
                 await cambiarEstadoPortal(true);
                 abrirInterfazAdmin('Christian');
             } else {
-                alert('Contraseña de administrador incorrecta.');
+                alert('Contraseña incorrecta.');
             }
         }
 
         // MOTOR EN TIEMPO REAL
         function conectarCanalTiempoReal() {
+            cargarAsignaturas();
             actualizarListasAdmin();
             verificarEstadoGlobalYSaltos();
 
-            _supabase.channel('portal-smr-pro')
+            _supabase.channel('portal-smr-dinamico')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios_online' }, payload => {
                     actualizarListasAdmin();
                     comprobarExpulsionBaneo(payload);
@@ -377,31 +366,202 @@
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'configuracion' }, payload => {
                     verificarEstadoGlobalYSaltos();
                 })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'contenido_portal' }, payload => {
+                    sincronizarPantallasDinamicas(payload);
+                })
                 .subscribe();
         }
 
+        // GESTIÓN DE CONTENIDO DINÁMICO (ASIGNATURAS, TEMAS, DOCUMENTOS)
+        async function cargarAsignaturas() {
+            let { data: asignaturas } = await _supabase.from('contenido_portal').select('*').eq('tipo', 'asignatura');
+            let contenedor = document.getElementById('lista-asignaturas');
+            if(!contenedor) return;
+
+            contenedor.innerHTML = '';
+            if(!asignaturas || asignaturas.length === 0) {
+                contenedor.innerHTML = '<p class="text-slate-500 italic col-span-2 text-center">No hay asignaturas creadas todavía.</p>';
+                return;
+            }
+
+            const isAdmin = sessionStorage.getItem('smr_is_admin') === 'true';
+
+            asignaturas.forEach(asig => {
+                let botonPapelera = isAdmin ? `<button onclick="event.stopPropagation(); eliminarElemento('${asig.id}')" class="text-rose-400 hover:text-rose-300 bg-rose-500/10 p-2 rounded-xl"><i class="fa-solid fa-trash"></i></button>` : '';
+                
+                contenedor.innerHTML += `
+                    <div onclick="abrirAsignatura('${asig.id}', '${asig.nombre}')" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-8 rounded-2xl cursor-pointer transition-all shadow-xl flex items-center justify-between group">
+                        <div class="flex items-center space-x-6">
+                            <div class="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 p-5 rounded-2xl text-3xl"><i class="fa-solid fa-book"></i></div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white mb-1 group-hover:text-cyan-400">${asig.nombre}</h3>
+                                <p class="text-xs text-slate-400">Ver temarios y manuales</p>
+                            </div>
+                        </div>
+                        ${botonPapelera}
+                    </div>
+                `;
+            });
+        }
+
+        async function abrirAsignatura(idAsignatura, nombreAsignatura) {
+            asignaturaActualId = idAsignatura;
+            document.getElementById('titulo-asignatura-seleccionada').textContent = nombreAsignatura;
+            
+            let { data: apartados } = await _supabase.from('contenido_portal').select('*').eq('tipo', 'apartado').eq('parent_id', idAsignatura);
+            let contenedor = document.getElementById('lista-apartados');
+            contenedor.innerHTML = '';
+
+            const isAdmin = sessionStorage.getItem('smr_is_admin') === 'true';
+
+            if(!apartados || apartados.length === 0) {
+                contenedor.innerHTML = '<p class="text-slate-500 italic col-span-3">No hay temas en esta asignatura.</p>';
+            } else {
+                apartados.forEach(apt => {
+                    let botonPapelera = isAdmin ? `<button onclick="event.stopPropagation(); eliminarElemento('${apt.id}')" class="text-rose-400 hover:text-rose-300 bg-rose-500/10 p-1.5 rounded-lg"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
+
+                    contenedor.innerHTML += `
+                        <div onclick="abrirApartado('${apt.id}', '${apt.nombre}')" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-6 rounded-2xl cursor-pointer transition-all shadow-md flex justify-between items-start group">
+                            <div>
+                                <h3 class="font-bold text-white text-base mb-1 group-hover:text-cyan-400"><i class="fa-solid fa-book-open text-cyan-400 mr-2"></i>${apt.nombre}</h3>
+                                <p class="text-xs text-slate-400">Ver documentos</p>
+                            </div>
+                            ${botonPapelera}
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('pagina-inicio').classList.add('hidden');
+            document.getElementById('pagina-asignatura').classList.remove('hidden');
+            document.getElementById('pagina-documentos').classList.add('hidden');
+        }
+
+        async function abrirApartado(idApartado, nombreApartado) {
+            apartadoActualId = idApartado;
+            document.getElementById('titulo-apartado-seleccionado').textContent = nombreApartado;
+
+            let { data: documentos } = await _supabase.from('contenido_portal').select('*').eq('tipo', 'documento').eq('parent_id', idApartado);
+            let contenedor = document.getElementById('lista-documentos');
+            contenedor.innerHTML = '';
+
+            const isAdmin = sessionStorage.getItem('smr_is_admin') === 'true';
+
+            if(!documentos || documentos.length === 0) {
+                contenedor.innerHTML = '<p class="text-slate-500 italic col-span-2">No hay documentos en este tema.</p>';
+            } else {
+                documentos.forEach(doc => {
+                    let botonPapelera = isAdmin ? `<button onclick="event.stopPropagation(); eliminarElemento('${doc.id}')" class="text-rose-400 hover:text-rose-300 bg-rose-500/10 p-1.5 rounded-lg"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
+
+                    contenedor.innerHTML += `
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between shadow-md relative">
+                            <div class="absolute top-4 right-4">${botonPapelera}</div>
+                            <div class="mb-4 pr-6">
+                                <i class="fa-solid fa-file-pdf text-rose-400 text-3xl mb-3"></i>
+                                <h4 class="font-bold text-white text-sm">${doc.nombre}</h4>
+                            </div>
+                            <a href="${doc.enlace || '#'}" target="_blank" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-center text-xs transition-colors flex items-center justify-center space-x-2 shadow-lg shadow-cyan-500/10">
+                                <i class="fa-solid fa-download"></i> <span>Descargar Documento</span>
+                            </a>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('pagina-asignatura').classList.add('hidden');
+            document.getElementById('pagina-documentos').classList.remove('hidden');
+        }
+
+        // MODALES PARA AÑADIR
+        function mostrarModalCrearAsignatura() {
+            tipoCreacionActual = 'asignatura';
+            document.getElementById('modal-titulo').textContent = 'Crear Nueva Asignatura';
+            document.getElementById('input-nombre-elemento').value = '';
+            document.getElementById('contenedor-input-enlace').classList.add('hidden');
+            document.getElementById('modal-creacion').classList.remove('hidden');
+        }
+
+        function mostrarModalCrearApartado() {
+            tipoCreacionActual = 'apartado';
+            document.getElementById('modal-titulo').textContent = 'Crear Nuevo Tema';
+            document.getElementById('input-nombre-elemento').value = '';
+            document.getElementById('contenedor-input-enlace').classList.add('hidden');
+            document.getElementById('modal-creacion').classList.remove('hidden');
+        }
+
+        function mostrarModalCrearDocumento() {
+            tipoCreacionActual = 'documento';
+            document.getElementById('modal-titulo').textContent = 'Subir Nuevo Documento';
+            document.getElementById('input-nombre-elemento').value = '';
+            document.getElementById('input-enlace-elemento').value = '';
+            document.getElementById('contenedor-input-enlace').classList.remove('hidden');
+            document.getElementById('modal-creacion').classList.remove('hidden');
+        }
+
+        function cerrarModalCreacion() {
+            document.getElementById('modal-creacion').classList.add('hidden');
+        }
+
+        async function guardarElementoDinamico(event) {
+            event.preventDefault();
+            let nombre = document.getElementById('input-nombre-elemento').value.trim();
+            if(!nombre) return;
+
+            let idUnico = 'item_' + Date.now();
+            let parentId = null;
+            let enlace = null;
+
+            if(tipoCreacionActual === 'apartado') parentId = asignaturaActualId;
+            if(tipoCreacionActual === 'documento') {
+                parentId = apartadoActualId;
+                enlace = document.getElementById('input-enlace-elemento').value.trim() || '#';
+            }
+
+            await _supabase.from('contenido_portal').insert([{
+                id: idUnico,
+                tipo: tipoCreacionActual,
+                parent_id: parentId,
+                nombre: nombre,
+                enlace: enlace
+            }]);
+
+            cerrarModalCreacion();
+        }
+
+        async function eliminarElemento(id) {
+            if(!confirm('¿Seguro que deseas eliminar este elemento?')) return;
+            await _supabase.from('contenido_portal').delete().eq('id', id);
+        }
+
+        function sincronizarPantallasDinamicas(payload) {
+            cargarAsignaturas();
+            if(asignaturaActualId && document.getElementById('pagina-asignatura').classList.contains('hidden') === false) {
+                abrirAsignatura(asignaturaActualId, document.getElementById('titulo-asignatura-seleccionada').textContent);
+            }
+            if(apartadoActualId && document.getElementById('pagina-documentos').classList.contains('hidden') === false) {
+                abrirApartado(apartadoActualId, document.getElementById('titulo-apartado-seleccionado').textContent);
+            }
+        }
+
+        // FUNCIONES DE USUARIOS Y ADMINS
         async function actualizarListasAdmin() {
             let { data: usuarios } = await _supabase.from('usuarios_online').select('*');
             if(usuarios) {
                 document.getElementById('online-count').textContent = usuarios.length;
-                let contenedorUsuarios = document.getElementById('admin-lista-usuarios');
-                if(contenedorUsuarios) {
-                    contenedorUsuarios.innerHTML = '';
-                    if(usuarios.length === 0) {
-                        contenedorUsuarios.innerHTML = '<p class="text-slate-500 italic">No hay usuarios activos.</p>';
-                    } else {
-                        usuarios.forEach(u => {
-                            contenedorUsuarios.innerHTML += `
-                                <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-800">
-                                    <span class="text-white font-medium"><i class="fa-solid fa-circle text-emerald-500 text-[8px] mr-2"></i>${u.nombre}</span>
-                                    <div class="space-x-1">
-                                        <button onclick="desconectarUsuario('${u.id}')" class="bg-amber-500/25 hover:bg-amber-500 text-amber-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold">Desconectar</button>
-                                        <button onclick="banearUsuario('${u.nombre}')" class="bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white px-2 py-1 rounded text-[11px] font-bold">Banear</button>
-                                    </div>
+                let contenedor = document.getElementById('admin-lista-usuarios');
+                if(contenedor) {
+                    contenedor.innerHTML = usuarios.length === 0 ? '<p class="text-slate-500 italic">No hay usuarios activos.</p>' : '';
+                    usuarios.forEach(u => {
+                        contenedor.innerHTML += `
+                            <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+                                <span class="text-white font-medium">${u.nombre}</span>
+                                <div class="space-x-1">
+                                    <button onclick="desconectarUsuario('${u.id}')" class="bg-amber-500/25 hover:bg-amber-500 text-amber-300 px-2 py-1 rounded text-[11px] font-bold">Desconectar</button>
+                                    <button onclick="banearUsuario('${u.nombre}')" class="bg-rose-500/25 hover:bg-rose-500 text-rose-300 px-2 py-1 rounded text-[11px] font-bold">Banear</button>
                                 </div>
-                            `;
-                        });
-                    }
+                            </div>
+                        `;
+                    });
                 }
             }
 
@@ -409,122 +569,74 @@
             if(baneados) {
                 let contenedorBaneados = document.getElementById('admin-lista-baneados');
                 if(contenedorBaneados) {
-                    contenedorBaneados.innerHTML = '';
-                    if(baneados.length === 0) {
-                        contenedorBaneados.innerHTML = '<p class="text-slate-500 italic">No hay usuarios baneados.</p>';
-                    } else {
-                        baneados.forEach(b => {
-                            contenedorBaneados.innerHTML += `
-                                <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-rose-500/20">
-                                    <span class="text-rose-200 font-medium"><i class="fa-solid fa-ban text-rose-500 text-[10px] mr-2"></i>${b.nombre}</span>
-                                    <button onclick="desbanearUsuario('${b.id}', '${b.nombre}')" class="bg-emerald-500/25 hover:bg-emerald-500 text-emerald-300 hover:text-white px-2.5 py-1 rounded text-[11px] font-bold">Desbanear</button>
-                                </div>
-                            `;
-                        });
-                    }
+                    contenedorBaneados.innerHTML = baneados.length === 0 ? '<p class="text-slate-500 italic">No hay baneados.</p>' : '';
+                    baneados.forEach(b => {
+                        contenedorBaneados.innerHTML += `
+                            <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-rose-500/20">
+                                <span class="text-rose-200 font-medium">${b.nombre}</span>
+                                <button onclick="desbanearUsuario('${b.id}')" class="bg-emerald-500/25 hover:bg-emerald-500 text-emerald-300 px-2.5 py-1 rounded text-[11px] font-bold">Desbanear</button>
+                            </div>
+                        `;
+                    });
                 }
             }
         }
 
-        // EXPULSIÓN Y BANEO INSTANTÁNEO
         async function comprobarExpulsionBaneo(payload) {
             const isAdmin = sessionStorage.getItem('smr_is_admin') === 'true';
             if(isAdmin) return; 
-
             let nombreUsuario = sessionStorage.getItem('smr_current_user');
             
             if(payload.table === 'usuarios_online' && payload.eventType === 'DELETE' && payload.old.id === usuarioActualId) {
-                alert('Has sido desconectado por el administrador.');
+                alert('Has sido desconectado.');
                 sessionStorage.clear();
                 location.reload();
             }
-
-            if(payload.table === 'baneados' && payload.eventType === 'INSERT' && nombreUsuario) {
-                if(payload.new.nombre.toLowerCase() === nombreUsuario.toLowerCase()) {
-                    alert('Has sido baneado del portal.');
-                    if(usuarioActualId) {
-                        await _supabase.from('usuarios_online').delete().eq('id', usuarioActualId);
-                    }
-                    sessionStorage.clear();
-                    location.reload();
-                }
+            if(payload.table === 'baneados' && payload.eventType === 'INSERT' && nombreUsuario && payload.new.nombre.toLowerCase() === nombreUsuario.toLowerCase()) {
+                alert('Has sido baneado.');
+                if(usuarioActualId) await _supabase.from('usuarios_online').delete().eq('id', usuarioActualId);
+                sessionStorage.clear();
+                location.reload();
             }
         }
 
-        async function desconectarUsuario(id) {
-            await _supabase.from('usuarios_online').delete().eq('id', id);
-        }
-
+        async function desconectarUsuario(id) { await _supabase.from('usuarios_online').delete().eq('id', id); }
         async function banearUsuario(nombre) {
             await _supabase.from('baneados').insert([{ nombre: nombre }]);
             let { data: usuarios } = await _supabase.from('usuarios_online').select('*');
-            if(usuarios) {
-                let userObj = usuarios.find(u => u.nombre.toLowerCase() === nombre.toLowerCase());
-                if(userObj) await _supabase.from('usuarios_online').delete().eq('id', userObj.id);
-            }
+            let u = usuarios.find(x => x.nombre.toLowerCase() === nombre.toLowerCase());
+            if(u) await _supabase.from('usuarios_online').delete().eq('id', u.id);
         }
+        async function desbanearUsuario(idBaneado) { await _supabase.from('baneados').delete().eq('id', idBaneado); }
 
-        async function desbanearUsuario(idBaneado, nombre) {
-            await _supabase.from('baneados').delete().eq('id', idBaneado);
-        }
-
-        // CONTROL DE ESTADO DEL PORTAL (ABIERTO / CERRADO)
-        async function cambiarEstadoPortal(abierto) {
-            await _supabase.from('configuracion').upsert({ id: 'estado_portal', activo: abierto });
-        }
-
-        // ALERTAS GLOBALES
+        async function cambiarEstadoPortal(abierto) { await _supabase.from('configuracion').upsert({ id: 'estado_portal', activo: abierto }); }
         async function enviarAvisoGlobal() {
             let texto = document.getElementById('admin-aviso-input').value.trim();
             if(!texto) return;
             let nombreAdmin = sessionStorage.getItem('smr_admin_name') || 'Admin';
-            let mensajeCompleto = `Aviso de ${nombreAdmin}: ${texto}`;
-
-            await _supabase.from('configuracion').upsert({ id: 'alerta', mensaje: mensajeCompleto, activo: true });
+            await _supabase.from('configuracion').upsert({ id: 'alerta', mensaje: `Aviso de ${nombreAdmin}: ${texto}`, activo: true });
             document.getElementById('admin-aviso-input').value = '';
             cerrarPanelAdmin();
         }
-
-        async function cerrarAlertaGlobal() {
-            await _supabase.from('configuracion').upsert({ id: 'alerta', activo: false });
-        }
+        async function cerrarAlertaGlobal() { await _supabase.from('configuracion').upsert({ id: 'alerta', activo: false }); }
 
         async function verificarEstadoGlobalYSaltos() {
             let { data: configs } = await _supabase.from('configuracion').select('*');
             if(!configs) return;
-
             const isAdmin = sessionStorage.getItem('smr_is_admin') === 'true';
 
             configs.forEach(c => {
                 if(c.id === 'estado_portal') {
-                    const pantallaMant = document.getElementById('pantalla-mantenimiento');
-                    const btnCerrar = document.getElementById('btn-cerrar-portal');
-                    const btnAbrir = document.getElementById('btn-abrir-portal');
-
-                    if(c.activo === false && !isAdmin) {
-                        pantallaMant.classList.remove('hidden');
-                    } else {
-                        pantallaMant.classList.add('hidden');
-                    }
-
-                    if(btnCerrar && btnAbrir) {
-                        if(c.activo === false) {
-                            btnCerrar.classList.add('hidden');
-                            btnAbrir.classList.remove('hidden');
-                        } else {
-                            btnCerrar.classList.remove('hidden');
-                            btnAbrir.classList.add('hidden');
-                        }
-                    }
+                    let mant = document.getElementById('pantalla-mantenimiento');
+                    if(c.activo === false && !isAdmin) mant.classList.remove('hidden');
+                    else mant.classList.add('hidden');
                 }
-
                 if(c.id === 'alerta') {
+                    let banner = document.getElementById('banner-alerta-global');
                     if(c.activo) {
                         document.getElementById('texto-alerta-global').textContent = c.mensaje;
-                        document.getElementById('banner-alerta-global').classList.remove('hidden');
-                    } else {
-                        document.getElementById('banner-alerta-global').classList.add('hidden');
-                    }
+                        banner.classList.remove('hidden');
+                    } else { banner.classList.add('hidden'); }
                 }
             });
         }
@@ -535,13 +647,10 @@
             const adminName = sessionStorage.getItem('smr_admin_name');
             usuarioActualId = sessionStorage.getItem('smr_user_id');
 
-            if(isAdmin === 'true') {
-                abrirInterfazAdmin(adminName || 'Admin');
-            } else if(usuarioGuardado) {
-                abrirInterfazUsuario(usuarioGuardado);
-            } else {
-                document.getElementById('login-modal').classList.remove('hidden');
-            }
+            if(isAdmin === 'true') abrirInterfazAdmin(adminName || 'Admin');
+            else if(usuarioGuardado) abrirInterfazUsuario(usuarioGuardado);
+            else document.getElementById('login-modal').classList.remove('hidden');
+
             conectarCanalTiempoReal();
         }
 
@@ -550,56 +659,7 @@
             document.getElementById('pagina-asignatura').classList.add('hidden');
             document.getElementById('pagina-documentos').classList.add('hidden');
         }
-
-        function abrirAsignatura(clave) {
-            asignaturaActual = clave;
-            const info = datosAsignaturas[clave];
-            document.getElementById('titulo-asignatura-seleccionada').textContent = info.nombre;
-            let contenedor = document.getElementById('lista-apartados');
-            contenedor.innerHTML = '';
-
-            info.apartados.forEach(apartado => {
-                contenedor.innerHTML += `
-                    <div onclick="abrirApartado('${apartado.id}')" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-6 rounded-2xl cursor-pointer transition-all shadow-md group">
-                        <h3 class="font-bold text-white text-base mb-1 group-hover:text-cyan-400"><i class="fa-solid fa-book-open text-cyan-400 mr-2"></i>${apartado.nombre}</h3>
-                        <p class="text-xs text-slate-400">Ver documentos y manuales</p>
-                    </div>
-                `;
-            });
-
-            document.getElementById('pagina-inicio').classList.add('hidden');
-            document.getElementById('pagina-asignatura').classList.remove('hidden');
-            document.getElementById('pagina-documentos').classList.add('hidden');
-        }
-
-        function abrirApartado(idApartado) {
-            const infoAsignatura = datosAsignaturas[asignaturaActual];
-            const apartado = infoAsignatura.apartados.find(a => a.id === idApartado);
-            document.getElementById('titulo-apartado-seleccionado').textContent = apartado.nombre;
-            let contenedor = document.getElementById('lista-documentos');
-            contenedor.innerHTML = '';
-
-            apartado.documentos.forEach(doc => {
-                contenedor.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between shadow-md">
-                        <div class="mb-4">
-                            <i class="fa-solid fa-file-pdf text-rose-400 text-3xl mb-3"></i>
-                            <h4 class="font-bold text-white text-sm">${doc.titulo}</h4>
-                        </div>
-                        <a href="${doc.enlace}" target="_blank" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-center text-xs transition-colors flex items-center justify-center space-x-2 shadow-lg shadow-cyan-500/10">
-                            <i class="fa-solid fa-download"></i> <span>Descargar Documento</span>
-                        </a>
-                    </div>
-                `;
-            });
-
-            document.getElementById('pagina-asignatura').classList.add('hidden');
-            document.getElementById('pagina-documentos').classList.remove('hidden');
-        }
-
-        function volverAAsignatura() {
-            abrirAsignatura(asignaturaActual);
-        }
+        function volverAAsignatura() { abrirAsignatura(asignaturaActualId, document.getElementById('titulo-asignatura-seleccionada').textContent); }
     </script>
 </body>
 </html>
