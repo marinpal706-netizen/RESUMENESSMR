@@ -232,7 +232,6 @@
         let apartadoActualId = null;
         let tipoCreacionActual = '';
 
-        // NUEVAS CONTRASEÑAS DE ADMINISTRADOR
         const ADMIN_JAVI = 'javierpalacios1234';
         const ADMIN_CHRISTIAN = 'christiandiaz4321';
 
@@ -604,7 +603,12 @@
         }
         async function desbanearUsuario(idBaneado) { await _supabase.from('baneados').delete().eq('id', idBaneado); }
 
-        async function cambiarEstadoPortal(abierto) { await _supabase.from('configuracion').upsert({ id: 'estado_portal', activo: abierto }); }
+        // CAMBIAR ESTADO DEL PORTAL (ABIERTO / CERRADO)
+        async function cambiarEstadoPortal(abierto) {
+            await _supabase.from('configuracion').upsert({ id: 'estado_portal', activo: abierto });
+            verificarEstadoGlobalYSaltos();
+        }
+
         async function enviarAvisoGlobal() {
             let texto = document.getElementById('admin-aviso-input').value.trim();
             if(!texto) return;
@@ -623,8 +627,24 @@
             configs.forEach(c => {
                 if(c.id === 'estado_portal') {
                     let mant = document.getElementById('pantalla-mantenimiento');
-                    if(c.activo === false && !isAdmin) mant.classList.remove('hidden');
-                    else mant.classList.add('hidden');
+                    let btnCerrar = document.getElementById('btn-cerrar-portal');
+                    let btnAbrir = document.getElementById('btn-abrir-portal');
+
+                    if(c.activo === false && !isAdmin) {
+                        mant.classList.remove('hidden');
+                    } else {
+                        mant.classList.add('hidden');
+                    }
+
+                    if(btnCerrar && btnAbrir) {
+                        if(c.activo === false) {
+                            btnCerrar.classList.add('hidden');
+                            btnAbrir.classList.remove('hidden');
+                        } else {
+                            btnCerrar.classList.remove('hidden');
+                            btnAbrir.classList.add('hidden');
+                        }
+                    }
                 }
                 if(c.id === 'alerta') {
                     let banner = document.getElementById('banner-alerta-global');
